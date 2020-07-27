@@ -1,0 +1,21 @@
+services:
+  app.service.battery:
+    class: App\Services\BatteryService
+
+  app.service.output_service:
+    class: App\Services\OutputService
+
+  app.service.clean_robot:
+    class: App\Services\CleanRobotService
+    arguments:
+      - '@app.service.battery'
+      - '@app.factory.command_factory'
+
+  app.factory.command_factory:
+    class: App\Factory\CleanRobotCommand\CommandFactory
+    arguments:
+      - '@app.service.battery'
+      - '@app.service.output_service'
+
+
+  App\Services\CleanRobotService: '@app.service.clean_robot'

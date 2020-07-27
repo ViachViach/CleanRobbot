@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  php:
+    container_name: php-fpm
+    build: ./docker/php-fpm
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./:/var/www/:cached
+    networks:
+      - php
+
+
+networks:
+  php:
