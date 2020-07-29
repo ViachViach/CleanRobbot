@@ -57,16 +57,8 @@ class CleaningRobotCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $pathInputFile = $input->getArgument('source');
-        $pathOutputFile = $input->getArgument('result');
-
-        if ($pathInputFile === null) {
-            $pathInputFile = __DIR__ . '/../../source.json';
-        }
-
-        if ($pathOutputFile === null) {
-            $pathOutputFile = __DIR__ .'/../../result.json';
-        }
+        $pathInputFile = $this->getPathFile($input,'/../../source.json');
+        $pathOutputFile = $this->getPathFile($input,'/../../result.json');
 
         $jsonParams = file_get_contents($pathInputFile);
 
@@ -82,11 +74,7 @@ class CleaningRobotCommand extends Command
         $cleanRobotDto = $this->createDto($inputSetting);
         $outputSetting = $this->cleanRobotService->handle($cleanRobotDto);
 
-        $finalPosition = new PositionDto();
-        $finalPosition->setY($cleanRobotDto->getAxisY());
-        $finalPosition->setX($cleanRobotDto->getAxisX());
-        $finalPosition->setFacing($cleanRobotDto->getDirection());
-
+        $finalPosition = $this->setFinalPosition($cleanRobotDto);
         $outputSetting->setFinal($finalPosition);
         $outputSetting->setBattery($cleanRobotDto->getChargingOfBattery());
 
@@ -101,6 +89,38 @@ class CleaningRobotCommand extends Command
         file_put_contents($pathOutputFile, $outputResult);
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @param CleanRobotDto $cleanRobot
+     *
+     * @return PositionDto
+     */
+    private function setFinalPosition(CleanRobotDto $cleanRobot): PositionDto
+    {
+        $finalPosition = new PositionDto();
+        $finalPosition->setY($cleanRobot->getAxisY());
+        $finalPosition->setX($cleanRobot->getAxisX());
+        $finalPosition->setFacing($cleanRobot->getDirection());
+
+        return $finalPosition;
+    }
+
+    /**
+     * @param InputInterface $input
+     * @param string         $defaultPath
+     *
+     * @return string
+     */
+    private function getPathFile(InputInterface $input, string $defaultPath): string
+    {
+        $path = $input->getArgument('source');
+
+        if ($path === null) {
+            $path = __DIR__ . $defaultPath;
+        }
+
+        return $path;
     }
 
     /**
